@@ -10,18 +10,41 @@ $('#todoInput').change(function () {
     let newTodo = {name: val};
     $.post('api/todos', newTodo)
         .then(function () {
-            $(this).val('');
+            $('#todoInput').val('');
             addTodo(newTodo);
         })
 })
 
+$('.list').on('click', 'span', function (el) {
+    el.stopPropagation();
+    removeTodo($(this).parent());
+})
+
 function addTodo(todo){
-        let el = '<li class="task">'+todo.name + '<span>X</span></li>';
-        $('.list').append(el);
+        let newTodo = $('<li class="task">'+ todo.name + '<span>X</span></li>');
+        newTodo.data('id', todo._id);
+        newTodo.data('completed', todo.comleted);
+        if(todo.comleted){
+            newTodo.addClass('done');
+        }
+        $('.list').append(newTodo);
 }
 
 function listTodos (todos) {
     todos.forEach(todo => {
         addTodo(todo);
     });
+}
+
+function removeTodo(todo) {
+    let todoId = todo.data('id');
+    let todoUrl = '/api/todos/' + todoId;
+    $.ajax({
+        method:'DELETE',
+        url:todoUrl
+    }).then(function(data){
+        todo.remove();
+    }).catch(function(err){
+        console.log(err);
+    })
 }
