@@ -2,22 +2,28 @@ $(document).ready(function () {
     var data = $.getJSON('/api/todos')
         .then(function(todos){
             listTodos(todos);
-        })
-})
+    })
 
-$('#todoInput').change(function () {
-    let val = $(this).val();
-    let newTodo = {name: val};
-    $.post('api/todos', newTodo)
-        .then(function () {
-            $('#todoInput').val('');
-            addTodo(newTodo);
-        })
-})
+    $('#todoInput').change(function () {
+        let val = $(this).val();
+        let newTodo = {
+            name: val
+        };
+        $.post('api/todos', newTodo)
+            .then(function () {
+                $('#todoInput').val('');
+                addTodo(newTodo);
+            })
+    })
 
-$('.list').on('click', 'span', function (el) {
-    el.stopPropagation();
-    removeTodo($(this).parent());
+    $('.list').on('click', 'span', function (el) {
+        el.stopPropagation();
+        removeTodo($(this).parent());
+    })
+
+    $('.list').on('click', 'li', function () {
+        updateTodo($(this))
+    })
 })
 
 function addTodo(todo){
@@ -47,4 +53,18 @@ function removeTodo(todo) {
     }).catch(function(err){
         console.log(err);
     })
+}
+
+function updateTodo(todo){
+     let todoUrl = '/api/todos/' + todo.data('id');
+     let isDone = !todo.data('completed');
+     let updateData = {comleted : isDone}
+     $.ajax({
+         method: 'PUT',
+         url:todoUrl,
+         data: updateData
+     }).then(function(){
+         todo.toggleClass('done');
+         todo.data('comleted', isDone)
+     })
 }
